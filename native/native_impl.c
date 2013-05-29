@@ -1,9 +1,13 @@
 #include <pwd.h>
+#include <pthread.h>
 #include "native_impl.h"
 #include "fuse_callback.h"
 #include "util.h"
 
 #define ENOTSUPP        524
+
+int countOfJavaFS = 0;
+pthread_mutex_t lockCountOfJavaFileSystems = PTHREAD_MUTEX_INITIALIZER;
 
 jobject CopyPasswordEntry(JNIEnv *env, jobject jCharset, struct passwd * pw)
 {
@@ -85,6 +89,9 @@ JNIEXPORT void JNICALL Java_fuse_FuseMount_mount(JNIEnv *env, jclass class, jobj
       int n = (*env)->GetArrayLength(env, jArgs);
       int fuseArgc = n + 1;
       char *fuseArgv[fuseArgc];
+      pthread_mutex_lock(&lockCountOfJavaFileSystems);
+      countOfJavaFS++; 
+      pthread_mutex_unlock(&lockCountOfJavaFileSystems);
 
       // fake 1st argument to be the name of executable
       fuseArgv[0] = "javafs";
@@ -121,6 +128,14 @@ JNIEXPORT void JNICALL Java_fuse_FuseMount_mount(JNIEnv *env, jclass class, jobj
                if (jerrno == 0 || jerrno == ENOTSUPP) {
                    // main loop
                    fuse_main(fuseArgc, fuseArgv, &javafs_oper, NULL);
+		   pthread_mutex_lock(&lockCountOfJavaFileSystems);
+		   countOfJavaFS--;
+		   if (countOfJavaFS != 0)
+		   {
+		       pthread_mutex_unlock(&lockCountOfJavaFileSystems);
+		       return;// Don't clean up if not last instance
+		   }
+		   pthread_mutex_unlock(&lockCountOfJavaFileSystems);
 
                    jerrno = (*env)->CallIntMethod(env, fuseFS, FuseFS->method.destroy);
                    exception_check_jerrno(env, &jerrno);
