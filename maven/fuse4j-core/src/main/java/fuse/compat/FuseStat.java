@@ -22,7 +22,6 @@ public class FuseStat extends FuseFtype implements FuseFtypeConstants
    public int atime;
    public int mtime;
    public int ctime;
-   public int crtime;
    public int blocks;
 
    // inode support fix by Edwin Olson <eolson@mit.edu>
@@ -40,7 +39,6 @@ public class FuseStat extends FuseFtype implements FuseFtypeConstants
           .append(", atime=").append(atime)
           .append(", mtime=").append(mtime)
           .append(", ctime=").append(ctime)
-          .append(", crtime=").append(crtime)
           .append(", blocks=").append(blocks)
           .append(", inode=").append(inode);
 
