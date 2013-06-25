@@ -23,11 +23,12 @@ public class FuseGetattr extends FuseFtype implements FuseGetattrSetter, FuseSta
    public int atime;
    public int mtime;
    public int ctime;
+   public int crtime;
 
    //
    // FuseGetattrSetter implementation
 
-   public void set(long inode, int mode, int nlink, int uid, int gid, int rdev, long size, long blocks, int atime, int mtime, int ctime)
+   public void set(long inode, int mode, int nlink, int uid, int gid, int rdev, long size, long blocks, int atime, int mtime, int ctime, int crtime)
    {
       this.inode = inode;
       this.mode = mode;
@@ -40,6 +41,7 @@ public class FuseGetattr extends FuseFtype implements FuseGetattrSetter, FuseSta
       this.atime = atime;
       this.mtime = mtime;
       this.ctime = ctime;
+      this.crtime = crtime;
 
    }
 
@@ -58,7 +60,8 @@ public class FuseGetattr extends FuseFtype implements FuseGetattrSetter, FuseSta
          .append(", blocks=").append(blocks)
          .append(", atime=").append(atime)
          .append(", mtime=").append(mtime)
-         .append(", ctime=").append(ctime);
+         .append(", ctime=").append(ctime)
+         .append(", crtime=").append(crtime);
 
       return true;
    }

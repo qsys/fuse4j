@@ -12,6 +12,7 @@ import fuse.compat.Filesystem2ToFilesystem3Adapter;
  * FuseFS adapters
  */
 public class FuseFSFactory {
+
 	/**
 	 * Wraps a filesystem1 object inside a FuseFS adapter.
 	 * 
@@ -101,4 +102,5 @@ public class FuseFSFactory {
 
 		return null;
 	}
+
 }

@@ -18,6 +18,7 @@ typedef struct _jclass_fuse_FuseGetattr
    {
       jfieldID atime;
       jfieldID blocks;
+      jfieldID crtime;
       jfieldID ctime;
       jfieldID gid;
       jfieldID inode;
@@ -46,7 +47,7 @@ typedef struct _jclass_fuse_FuseGetattr
       jmethodID hashCode;
       jmethodID notify;
       jmethodID notifyAll;
-      jmethodID set__JIIIIIJJIII;
+      jmethodID set__JIIIIIJJIIII;
       jmethodID toString;
       jmethodID wait;
       jmethodID wait__J;
