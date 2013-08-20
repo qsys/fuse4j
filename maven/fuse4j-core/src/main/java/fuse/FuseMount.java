@@ -119,9 +119,10 @@ public class FuseMount {
 	}
 
 	// byte level API
-	public static void mount(final String[] args,
+	public static void mountNonBlocking(final String[] args,
 			final Filesystem3 filesystem3, final ThreadGroup group,
-			final Logger log, final Fuse4JShutdownCallback cb) throws Exception {
+			final Logger log, final Fuse4JShutdownCallback cb,
+			final boolean setDaemon) throws Exception {
 
 		final Filesystem3ToFuseFSAdapter fuseFS = new Filesystem3ToFuseFSAdapter(
 				filesystem3, log);
@@ -149,9 +150,38 @@ public class FuseMount {
 				}
 			}
 		});
-		group.setDaemon(true);
-		fuseThread.setDaemon(true);
+		group.setDaemon(setDaemon);
+		fuseThread.setDaemon(setDaemon);
 		fuseThread.start();
+	}
+
+	public static void mount(final String[] args,
+			final Filesystem3 filesystem3, final ThreadGroup group,
+			final Logger log, final Fuse4JShutdownCallback cb) throws Exception {
+
+		final Filesystem3ToFuseFSAdapter fuseFS = new Filesystem3ToFuseFSAdapter(
+				filesystem3, log);
+		try {
+			log.info("Mounting filesystem");
+			mount(args, fuseFS, group);
+			log.info("Filesystem is unmounted");
+			if ((log != null)) {
+				final int n = group.activeCount();
+				log.fine("ThreadGroup(\"" + group.getName()
+						+ "\").activeCount() = " + n);
+
+				final Thread[] threads = new Thread[n];
+				group.enumerate(threads);
+				for (int i = 0; i < threads.length; i++) {
+					log.fine("thread[" + i + "] = " + threads[i]
+							+ ", isDaemon = " + threads[i].isDaemon());
+				}
+			}
+			cb.unmounted();
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+		group.setDaemon(true);
 	}
 
 	private static native void mount(String[] args, FuseFS fuseFS,
