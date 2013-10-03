@@ -96,16 +96,16 @@ public class FakeFilesystem implements Filesystem3, XattrSupport,
 
 		FileHandle(final Node node) {
 			this.node = node;
-			log.debug("  " + this + " created");
+			log.info("  " + this + " created");
 		}
 
 		void release() {
-			log.debug("  " + this + " released");
+			log.info("  " + this + " released");
 		}
 
 		@Override
 		protected void finalize() {
-			log.debug("  " + this + " finalized");
+			log.info("  " + this + " finalized");
 		}
 
 		@Override
@@ -129,9 +129,7 @@ public class FakeFilesystem implements Filesystem3, XattrSupport,
 		final Node node = (parent instanceof Directory) ? ((Directory) parent).files
 				.get(f.getName()) : null;
 
-		if (log.isDebugEnabled()) {
-			log.debug("  lookup(\"" + path + "\") returning: " + node);
-		}
+		log.info("  lookup(\"" + path + "\") returning: " + node);
 
 		return node;
 	}
