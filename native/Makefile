@@ -1,10 +1,10 @@
 SRCS=fuse_callback.c javafs.c javafs_bindings.c native_impl.c util.c
 OBJS=fuse_callback.o javafs.o javafs_bindings.o native_impl.o util.o
 
-OS=$(shell ./getos)
 
+os=$(shell ./getos)
 
-include make.flags.$(OS)
+include make.flags.$(os)
 
 DEPEND=makedepend $(DEPFLAGS)
 
