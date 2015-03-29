@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ -f /etc/lsb-release ]; then
+	os=$(lsb_release -s)
+elif [ -f /etc/debian_version ]; then
+	os="debian"
+elif [ -f /etc/ubuntu_version ]; then
+	os="ubuntu"
+elif [ -f /etc/redhat-release ]; then
+	os=`cat /etc/redhat-release`
+else
+	os="$(uname -s)"
+fi
+
+echo $os

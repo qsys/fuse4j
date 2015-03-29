@@ -1,0 +1,18 @@
+FUSE_HOME=/usr/local
+
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_15.jdk/Contents/Home
+JAVA_HEADERS=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers
+
+#INCLUDES=-I${JAVA_HEADERS} -I${FUSE_HOME}/include
+INCLUDES=-I${JAVA_HEADERS} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${FUSE_HOME}/include -I${FUSE_HOME}/include/osxfuse/ 
+
+LDPATH=-L/Library/Java/Extensions -L/System/Library/Java/Extensions -L${FUSE_HOME}/lib -framework CoreFoundation -framework IOKit -framework JavaVM
+
+LIB_SO=libjavafs.jnilib
+FS_EXE=javafs
+
+CC=gcc
+DEPFLAGS=-D__FreeBSD__=10 -D_FILE_OFFSET_BITS=64
+CFLAGS=-Wall -fPIC ${DEPFLAGS} -arch x86_64
+LD=libtool -dynamic
+LDFLAGS=-losxfuse -lpthread -lSystem
