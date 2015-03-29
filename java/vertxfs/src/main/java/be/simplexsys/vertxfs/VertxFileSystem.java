@@ -1,30 +1,37 @@
 /**
- *   FUSE-J: Java bindings for FUSE (Filesystem in Userspace by Miklos Szeredi (mszeredi@inf.bme.hu))
- *
- *   Copyright (C) 2003 Peter Levart (peter@select-tech.si)
- *
- *   This program can be distributed under the terms of the GNU LGPL.
- *   See the file COPYING.LIB
+
  */
 
-package fuse.staticfs;
+package be.simplexsys.vertxfs;
 
 import fuse.*;
-import fuse.compat.Filesystem1;
 import fuse.compat.FuseDirEnt;
 import fuse.compat.FuseStat;
+import io.vertx.core.*;
+import io.vertx.core.eventbus.*;
+import io.vertx.core.logging.*;
+import io.vertx.core.logging.impl.*;
 
-import java.nio.ByteBuffer;
+import java.nio.*;
 
 
-public class StaticFilesystem implements Filesystem1
+public class VertxFileSystem implements Filesystem3
 {
+   private final Logger LOG = LoggerFactory.getLogger(VertxFileSystem.class);
+
    DirectoryNode rootNode;
    FuseStatfs statfs;
 
 
-   public StaticFilesystem(DirectoryNode rootNode)
+   public VertxFileSystem(DirectoryNode rootNode)
    {
+      VertxOptions options = new VertxOptions();
+      Vertx.clusteredVertx(options, res -> {
+         if (res.succeeded()) {
+            EventBus eventBus = res.result().eventBus();
+            LOG.info("Got event bus!");
+         }
+      });
       this.rootNode = rootNode;
 
       statfs = new FuseStatfs();
@@ -41,30 +48,31 @@ public class StaticFilesystem implements Filesystem1
       return rootNode;
    }
 
-   //
+
+
    // Filesystem implementation
 
-   public void chmod(String path, int mode) throws FuseException
+   public int chmod(String path, int mode) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().chmod(rr.path, mode);
-         return;
+         return mode;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
    }
 
-   public void chown(String path, int uid, int gid) throws FuseException
+   public int chown(String path, int uid, int gid) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().chown(rr.path, uid, gid);
-         return;
+         return uid;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
@@ -111,7 +119,7 @@ public class StaticFilesystem implements Filesystem1
       return dirEntries;
    }
 
-   public void link(String from, String to) throws FuseException
+   public int link(String from, String to) throws FuseException
    {
       ResolveResult fromRr = resolvePath(from);
       ResolveResult toRr = resolveParentPath(to);
@@ -134,29 +142,42 @@ public class StaticFilesystem implements Filesystem1
       {
          throw new FuseException("Read Only").initErrno(FuseException.EROFS);
       }
+      return 0;
    }
 
-   public void mkdir(String path, int mode) throws FuseException
+   public int mkdir(String path, int mode) throws FuseException
    {
       ResolveResult rr = resolveParentPath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().mkdir(rr.path, mode);
-         return;
+         return mode;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
    }
 
-   public void mknod(String path, int mode, int rdev) throws FuseException
+   public int getattr(String path, FuseGetattrSetter getattrSetter) throws FuseException {
+      return 0;
+   }
+
+   public int readlink(String path, CharBuffer link) throws FuseException {
+      return 0;
+   }
+
+   public int getdir(String path, FuseDirFiller dirFiller) throws FuseException {
+      return 0;
+   }
+
+   public int mknod(String path, int mode, int rdev) throws FuseException
    {
       ResolveResult rr = resolveParentPath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().mknod(rr.path, mode, rdev);
-         return;
+         return mode;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
@@ -236,7 +257,7 @@ public class StaticFilesystem implements Filesystem1
       throw new FuseException("Not a File").initErrno(FuseException.EINVAL);
    }
 
-   public void rename(String from, String to) throws FuseException
+   public int rename(String from, String to) throws FuseException
    {
       ResolveResult fromRr = resolvePath(from);
       ResolveResult toRr = resolveParentPath(to);
@@ -259,16 +280,17 @@ public class StaticFilesystem implements Filesystem1
       {
          throw new FuseException("Read Only").initErrno(FuseException.EROFS);
       }
+      return 0;
    }
 
-   public void rmdir(String path) throws FuseException
+   public int rmdir(String path) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().rmdir(rr.path);
-         return;
+         return 0;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
@@ -279,68 +301,96 @@ public class StaticFilesystem implements Filesystem1
       return statfs;
    }
 
-   public void symlink(String from, String to) throws FuseException
+   public int symlink(String from, String to) throws FuseException
    {
       ResolveResult rr = resolveParentPath(to);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().symlink(from, rr.path);
-         return;
+         return 0;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
    }
 
-   public void truncate(String path, long size) throws FuseException
+   public int truncate(String path, long size) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().truncate(rr.path, size);
-         return;
+         return 0;
       }
 
       if (rr.node instanceof FileNode)
       {
          ((FileNode) rr.node).truncate(size);
-         return;
+         return 0;
       }
 
       throw new FuseException("Not a File").initErrno(FuseException.EINVAL);
    }
 
-   public void unlink(String path) throws FuseException
+   public int unlink(String path) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().unlink(rr.path);
-         return;
+         return 0;
       }
 
       throw new FuseException("Read Only").initErrno(FuseException.EROFS);
    }
 
-   public void utime(String path, int atime, int mtime) throws FuseException
+   public int utime(String path, int atime, int mtime) throws FuseException
    {
       ResolveResult rr = resolvePath(path);
 
       if (rr.node instanceof MountpointNode)
       {
          ((MountpointNode) rr.node).getFilesystem().utime(rr.path, atime, mtime);
-         return;
+         return atime;
       }
 
       if (rr.node instanceof FileNode)
       {
          ((FileNode) rr.node).utime(atime, mtime);
-         return;
+         return atime;
       }
 
       throw new FuseException("Not a File").initErrno(FuseException.EINVAL);
+   }
+
+   public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
+      return 0;
+   }
+
+   public int open(String path, int flags, FuseOpenSetter openSetter) throws FuseException {
+      return 0;
+   }
+
+   public int read(String path, Object fh, ByteBuffer buf, long offset) throws FuseException {
+      return 0;
+   }
+
+   public int write(String path, Object fh, boolean isWritepage, ByteBuffer buf, long offset) throws FuseException {
+      return 0;
+   }
+
+   public int flush(String path, Object fh) throws FuseException {
+      return 0;
+   }
+
+   public int release(String path, Object fh, int flags) throws FuseException {
+      return 0;
+   }
+
+   public int fsync(String path, Object fh, boolean isDatasync) throws FuseException {
+      return 0;
    }
 
    public void write(String path, ByteBuffer buf, long offset) throws FuseException

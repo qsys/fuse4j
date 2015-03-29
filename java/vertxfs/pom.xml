@@ -1,24 +1,42 @@
 <?xml version="1.0"?>
 <project>
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>be.simplexsys.vertxfs</artifactId>
-	<groupId>core</groupId>
-	<version>1.0.0-SNAPSHOT</version>
+    <artifactId>be.simplexsys.vertxfs</artifactId>
+    <groupId>core</groupId>
+    <version>1.0.0-SNAPSHOT</version>
 
-	<name>Vertx filesystem core</name>
+    <name>Vertx filesystem core</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>fuse4j</groupId>
-			<artifactId>fuse4j-core</artifactId>
-			<version>2.4.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>fuse4j</groupId>
+            <artifactId>fuse4j-core</artifactId>
+            <version>2.4.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>3.0.0-dev_preview1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

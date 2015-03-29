@@ -7,7 +7,7 @@
  *   See the file COPYING.LIB
  */
 
-package fuse.staticfs;
+package be.simplexsys.vertxfs;
 
 import fuse.compat.FuseStat;
 
