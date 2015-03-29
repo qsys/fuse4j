@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>fuse4j-staticfs</artifactId>
+	<groupId>fuse4j</groupId>
+	<version>2.4.0.0-SNAPSHOT</version>
+
+	<name>Fuse4J Static Filesystem</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>fuse4j</groupId>
+			<artifactId>fuse4j-core</artifactId>
+			<version>2.4.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
